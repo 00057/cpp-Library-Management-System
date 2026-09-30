@@ -37,6 +37,8 @@
 
 ## 编译运行
 
+如果使用 Dev-C++ 或 VS Code，直接下载并打开 main.cpp，编译运行即可。
+
 Linux / macOS：
 ```bash
 g++ main.cpp -o library
