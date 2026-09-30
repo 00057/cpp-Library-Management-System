@@ -1,4 +1,4 @@
-# cpp-book-management-system
+# cpp-Library-Management-System
 
 - 一个基于控制台的单文件 C++ 图书管理系统，支持用户登录注册、权限管理、图书管理，并使用文件保存用户及图书数据。采用分级菜单设计，逻辑清晰。
 - 来源：湖南大学 程序设计
