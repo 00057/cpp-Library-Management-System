@@ -5,13 +5,17 @@
 #include<cstring>
 using namespace std;
 
-//1.全局变量 
+
+//------------------------------1.全局变量 ------------------------------
+
 
 int Role=0;//0未登录 1用户 2管理员
 int Page=1;//1登录 2图书系统 3图书管理 4账号管理
 int Booksortsign=0;//0未排序 1已排序
 
-//2.书籍管理 
+
+//------------------------------2.书籍管理 ------------------------------
+
 
 //bookmanager
 
@@ -312,7 +316,7 @@ void displayTop10ByReadNum(struct Nodebook* headNode)
 	printf("=========================================\n");
 }
 
-// 2. 最新出版排行榜（按publishtime排序，数值越大表示越新）
+// 2.5.2 最新出版排行榜（按publishtime排序，数值越大表示越新）
 // 比较函数，用于qsort（出版时间降序）
 int compareByPublishTime(const void* a, const void* b)
 {
@@ -391,24 +395,9 @@ void displayTop10ByPublishTime(struct Nodebook* headNode)
 }
 
 
+//------------------------------3.登录模块 ------------------------------
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//3.登录模块 
- 
 //register
 
 //3.1账号信息
@@ -591,26 +580,11 @@ void mergeSortuserList(struct Nodeuser* headNode)
 }
 
 
+//------------------------------4.菜单 ------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//4.菜单 
 
 //Page1→Role1→Page2→Page5/6
-//       Role2→Page2→Page3/4/5/6
+//     →Role2→Page2→Page3/4/5/6
 
 //Page1
 void makeuserMenu()
@@ -716,23 +690,7 @@ void makebookMenuPage6()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//5.文件操作
+//------------------------------5.文件操作------------------------------
 
 //5.1 图书模块文件操作 
 
@@ -823,24 +781,9 @@ void readuserInfoFromFile(const char *fileName,struct Nodeuser* headNode)
 }
 
 
+//------------------------------6.交互模块------------------------------
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//6.交互模块
- 
 //6.1 Page1 
 
 void userkeyDown()
@@ -1418,23 +1361,8 @@ void bookkeyDownPage6()
 }
 
 
+//------------------------------7.main函数 ------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//7.main函数 
 
 int main()
 {
