@@ -67,3 +67,7 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# 项目专属数据文件
+userinfo.txt
+bookinfo.txt
