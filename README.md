@@ -39,16 +39,12 @@
 
 如果使用 Dev-C++ 或 VS Code，直接下载并打开 main.cpp，编译运行即可。
 
-Linux / macOS：
-```bash
-g++ main.cpp -o library
-./library
-```
 Windows:
 ```bash
 g++ main.cpp -o library.exe
 library.exe
 ```
+环境说明：本项目使用了 Windows 特有的控制台命令（如 system("cls")），建议在 Windows 环境下编译运行。如果需要在 Linux / macOS 下运行，请将代码中的 system("cls") 替换为 system("clear")，并移除或替换 system("pause")。
 
 ## 使用说明
 
