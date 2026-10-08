@@ -103,11 +103,10 @@ void printbookList(struct Nodebook *headNode)
 {
 	struct Nodebook *pMove = headNode->next;
 
-	printf("书名/价格/数量/作者/出版社/ISBN/借阅次数\n");
-
+	//[索引][表格]
 	while (pMove != NULL)
 	{
-		printf("%s\t%.1f\t%d\t%s\t%s\t%s\t%d\n",
+		printf("书名: %s | 价格: %.1f | 数量: %d | 作者: %s | 出版社: %s | ISBN: %s | 借阅次数: %d\n",
 			   pMove->data.name,
 			   pMove->data.price,
 			   pMove->data.num,
@@ -115,7 +114,6 @@ void printbookList(struct Nodebook *headNode)
 			   pMove->data.publishinghouse,
 			   pMove->data.ISBN,
 			   pMove->data.readnum);
-
 		pMove = pMove->next;
 	}
 }
@@ -159,19 +157,22 @@ void searchAndPrintBooksByAuthor(struct Nodebook *headNode, char *authorName)
 {
 	struct Nodebook *posNode = headNode->next;
 	int count = 0;
+
 	printf("作者 '%s' 的书籍列表\n\n", authorName);
+
+	//[索引][表格]
 	while (posNode != NULL)
 	{
 		if (strcmp(posNode->data.author, authorName) == 0)
 		{
 			count++;
-			printf("%d. ", count);
-			printf("书名:%s  ", posNode->data.name);
-			printf("ISBN:%s  ", posNode->data.ISBN);
-			printf("价格:%.2f  ", posNode->data.price);
-			printf("数量:%d  ", posNode->data.num);
-			printf("出版社:%s  ", posNode->data.publishinghouse);
-			printf("借阅次数:%d\n\n", posNode->data.readnum); // 输出借阅次数
+			printf("书名: %s | ISBN: %s | 价格: %.2f | 数量: %d | 出版社: %s | 借阅次数: %d\n",
+				   posNode->data.name,
+				   posNode->data.ISBN,
+				   posNode->data.price,
+				   posNode->data.num,
+				   posNode->data.publishinghouse,
+				   posNode->data.readnum);
 		}
 		posNode = posNode->next;
 	}
@@ -290,7 +291,7 @@ int compareByReadNum(const void *a, const void *b)
 void displayTop10ByReadNum(struct Nodebook *headNode)
 {
 	printf("=== 借阅次数排行榜 TOP 10 ===\n");
-	// 计算书籍总数
+
 	int count = 0;
 	struct Nodebook *temp = headNode->next;
 	while (temp != NULL)
@@ -298,12 +299,13 @@ void displayTop10ByReadNum(struct Nodebook *headNode)
 		count++;
 		temp = temp->next;
 	}
+
 	if (count == 0)
 	{
 		printf("暂无书籍数据！\n");
 		return;
 	}
-	// 创建数组存储书籍指针
+
 	Nodebook **books = new Nodebook *[count];
 
 	temp = headNode->next;
@@ -312,20 +314,23 @@ void displayTop10ByReadNum(struct Nodebook *headNode)
 		books[i] = temp;
 		temp = temp->next;
 	}
-	// 使用qsort快速排序（O(n log n)）
+
 	qsort(books, count, sizeof(struct Nodebook *), compareByReadNum);
-	// 显示前10本（或更少）
+
 	int displayCount = count < 10 ? count : 10;
-	printf("%-4s %-20s\t%-15s\t%-8s\t%-10s\n", "排名", "书名", "作者", "价格",
-		   "借阅次数");
-	printf("-----------------------------------------------------------\n");
+
+	//[索引][表格]
 	for (int i = 0; i < displayCount; i++)
 	{
-		printf("%-4d %-20s\t%-15s\t%-8.1f\t%-10d\n", i + 1, books[i]->data.name,
-			   books[i]->data.author, books[i]->data.price, books[i]->data.readnum);
+		printf("排名: %d | 书名: %s | 作者: %s | 价格: %.1f | 借阅次数: %d\n",
+			   i + 1,
+			   books[i]->data.name,
+			   books[i]->data.author,
+			   books[i]->data.price,
+			   books[i]->data.readnum);
 	}
+
 	delete[] books;
-	printf("=========================================\n");
 }
 
 // 2.5.2 最新出版排行榜（按publishtime排序，数值越大表示越新）
@@ -358,7 +363,6 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 {
 	printf("=== 最新出版排行榜 TOP 10 ===\n");
 
-	// 计算书籍总数
 	int count = 0;
 	struct Nodebook *temp = headNode->next;
 	while (temp != NULL)
@@ -373,7 +377,6 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 		return;
 	}
 
-	// 创建数组存储书籍指针
 	Nodebook **books = new Nodebook *[count];
 
 	temp = headNode->next;
@@ -383,23 +386,22 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 		temp = temp->next;
 	}
 
-	// 使用qsort快速排序（O(n log n)）
 	qsort(books, count, sizeof(struct Nodebook *), compareByPublishTime);
 
-	// 显示前10本（或更少）
 	int displayCount = count < 10 ? count : 10;
-	printf("%-4s %-20s\t%-15s\t%-8s\t%-10s\n", "排名", "书名", "作者", "价格",
-		   "借阅次数");
-	printf("-----------------------------------------------------------\n");
 
+	//[索引][表格]
 	for (int i = 0; i < displayCount; i++)
 	{
-		printf("%-4d %-20s\t%-15s\t%-8.1f\t%-10d\n", i + 1, books[i]->data.name,
-			   books[i]->data.author, books[i]->data.price, books[i]->data.readnum);
+		printf("排名: %d | 书名: %s | 作者: %s | 价格: %.1f | 借阅次数: %d\n",
+			   i + 1,
+			   books[i]->data.name,
+			   books[i]->data.author,
+			   books[i]->data.price,
+			   books[i]->data.readnum);
 	}
 
 	delete[] books;
-	printf("============================================================\n");
 }
 
 //------------------------------p3.登录模块 ------------------------------
@@ -472,11 +474,10 @@ void printuserList(struct Nodeuser *headNode)
 {
 	struct Nodeuser *pMove = headNode->next;
 
-	printf("Account/Password/Role\n");
-
+	//[索引][表格]
 	while (pMove != NULL)
 	{
-		printf("%s\t%s\t%d\n",
+		printf("账号: %s | 密码: %s | 权限: %d\n",
 			   pMove->data.Account,
 			   pMove->data.Password,
 			   pMove->data.Role);
@@ -718,11 +719,11 @@ void savebookInfoToFile(const char *fileName, struct Nodebook *headNode)
 	while (pMove != NULL)
 	{
 		fprintf(fp,
-				"%s\t%.1f\t%d\t%s\t%s\t%s\t%d\t%d\n", // 格式修改，添加publishtime
+				"%s\t%.1f\t%d\t%s\t%s\t%s\t%d\t%d\n",
 				pMove->data.name, pMove->data.price, pMove->data.num,
 				pMove->data.author, pMove->data.publishinghouse, pMove->data.ISBN,
 				pMove->data.readnum,
-				pMove->data.publishtime); // 新增：保存publishtime
+				pMove->data.publishtime);
 		pMove = pMove->next;
 	}
 	fclose(fp);
@@ -962,11 +963,12 @@ void bookkeyDownRole1() // 用户模式
 				bookresult->data.readnum++; // 借阅次数+1
 				savebookInfoToFile("bookinfo.txt", booklist);
 				printf("借阅成功！\n");
-				printf("书名/剩余数量/借阅次数\n");
-				printf("%s\t%d\t%d\n",
+
+				//[索引][表格]
+				printf("书名: %s | 库存: %d | 借阅次数: %d\n",
 					   bookresult->data.name,
 					   bookresult->data.num,
-					   bookresult->data.readnum); // 显示借阅次数
+					   bookresult->data.readnum);
 			}
 			else
 			{
@@ -991,11 +993,12 @@ void bookkeyDownRole1() // 用户模式
 			bookresult->data.num++;
 			savebookInfoToFile("bookinfo.txt", booklist);
 			printf("书籍归还成功！\n");
-			printf("书名/剩余数量/借阅次数\n");
-			printf("%s\t%d\t%d\n",
+
+			//[索引][表格]
+			printf("书名: %s | 库存: %d | 借阅次数: %d\n",
 				   bookresult->data.name,
 				   bookresult->data.num,
-				   bookresult->data.readnum); // 显示借阅次数
+				   bookresult->data.readnum);
 		}
 		break;
 	case 6:
@@ -1064,11 +1067,12 @@ void bookkeyDownRole2() // 管理员模式
 				bookresult->data.readnum++; // 借阅次数+1
 				savebookInfoToFile("bookinfo.txt", booklist);
 				printf("借阅成功！\n");
-				printf("书名/剩余数量/借阅次数\n");
-				printf("%s\t%d\t%d\n",
+
+				//[索引][表格]
+				printf("书名: %s | 库存: %d | 借阅次数: %d\n",
 					   bookresult->data.name,
 					   bookresult->data.num,
-					   bookresult->data.readnum); // 显示借阅次数
+					   bookresult->data.readnum);
 			}
 			else
 			{
@@ -1093,11 +1097,12 @@ void bookkeyDownRole2() // 管理员模式
 			bookresult->data.num++;
 			savebookInfoToFile("bookinfo.txt", booklist);
 			printf("书籍归还成功！\n");
-			printf("书名/剩余数量/借阅次数\n");
-			printf("%s\t%d\t%d\n",
+
+			//[索引][表格]
+			printf("书名: %s | 库存: %d | 借阅次数: %d\n",
 				   bookresult->data.name,
 				   bookresult->data.num,
-				   bookresult->data.readnum); // 显示借阅次数
+				   bookresult->data.readnum);
 		}
 		break;
 	case 6:
@@ -1256,16 +1261,25 @@ void bookkeyDownRole2user()
 			cout << "当前账号：" << userresult->data.Account << "\n";
 			cout << "当前密码：" << userresult->data.Password << "\n";
 			cout << "确定要重置密码为123456吗？是请输入1，否请输入0\n";
-			char tempA[20];
+
+			string tempA;
 			cin >> tempA;
-			if (strcmp(tempA, "1") == 0)
+
+			if (tempA == "1")
 			{
 				cout << "重置默认密码：123456\n";
 				strcpy(userresult->data.Password, "123456");
 				saveuserInfoToFile("userinfo.txt", userlist);
 			}
+			else if (tempA == "0")
+			{
+				cout<<"【返回】";
+				break;
+			}
 			else
-				cout << "【返回】";
+			{
+				cout << "无效的输入，请输入0或1\n【返回】";
+			}
 		}
 		break;
 	}
@@ -1284,8 +1298,8 @@ void bookkeyDownRole2user()
 		}
 		else
 		{
-			printf("账号/密码/权限\n");
-			printf("%s\t%s\t%d\n",
+			//[索引][表格]
+			printf("账号: %s | 密码: %s | 权限: %d\n",
 				   userresult->data.Account,
 				   userresult->data.Password,
 				   userresult->data.Role);
@@ -1332,15 +1346,15 @@ void bookkeyDownPage5()
 		}
 		else
 		{
-			printf("书名/价格/数量/作者/出版社/ISBN/借阅次数\n");
-			printf("%s\t%.1f\t%d\t%s\t%s\t%s\t%d\n",
+			//[索引][表格]
+			printf("书名: %s | 价格: %.1f | 数量: %d | 作者: %s | 出版社: %s | ISBN: %s | 借阅次数: %d\n",
 				   bookresult->data.name,
 				   bookresult->data.price,
 				   bookresult->data.num,
 				   bookresult->data.author,
 				   bookresult->data.publishinghouse,
 				   bookresult->data.ISBN,
-				   bookresult->data.readnum); // 输出借阅次数
+				   bookresult->data.readnum);
 		}
 		break;
 	}
@@ -1359,15 +1373,15 @@ void bookkeyDownPage5()
 		}
 		else
 		{
-			printf("书名/价格/数量/作者/出版社/ISBN/借阅次数\n");
-			printf("%s\t%.1f\t%d\t%s\t%s\t%s\t%d\n",
+			//[索引][表格]
+			printf("书名: %s | 价格: %.1f | 数量: %d | 作者: %s | 出版社: %s | ISBN: %s | 借阅次数: %d\n",
 				   bookresult->data.name,
 				   bookresult->data.price,
 				   bookresult->data.num,
 				   bookresult->data.author,
 				   bookresult->data.publishinghouse,
 				   bookresult->data.ISBN,
-				   bookresult->data.readnum); // 输出借阅次数
+				   bookresult->data.readnum);
 		}
 		break;
 	}
