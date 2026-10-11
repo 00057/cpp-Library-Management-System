@@ -1,11 +1,11 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
+#include <fstream>
+#include <vector>
+
 using namespace std;
 
 /*
@@ -33,14 +33,14 @@ int Booksortsign = 0; // 0未排序 1已排序
 
 struct bookInfo
 {
-	char name[20];			  // 书名
-	float price;			  // 价格
-	int num;				  // 数量
-	char author[20];		  // 作者
-	char publishinghouse[20]; // 出版社
-	char ISBN[20];			  // ISBN
-	int readnum;			  // 借阅次数
-	int publishtime;		  // 录入顺序编号 - 新增
+	std::string name;			 // 书名
+	float price;				 // 价格
+	int num;					 // 数量
+	std::string author;			 // 作者
+	std::string publishinghouse; // 出版社
+	std::string ISBN;			 // ISBN
+	int readnum;				 // 借阅次数
+	int publishtime;			 // 录入顺序编号 - 新增
 };
 
 // 2.2书籍链表
@@ -76,12 +76,12 @@ void insertbookNodeByHead(struct Nodebook *headNode, struct bookInfo data)
 	Booksortsign = 0;
 }
 // 指定元素删除
-void deletebookNodeByName(struct Nodebook *headNode, char *bookName)
+void deletebookNodeByName(struct Nodebook *headNode, std::string bookName)
 {
 	struct Nodebook *posLeftNode = headNode;
 	struct Nodebook *posNode = headNode->next;
 
-	while (posNode != NULL && strcmp(posNode->data.name, bookName))
+	while (posNode != NULL && posNode->data.name != bookName)
 	{
 		posLeftNode = posNode;
 		posNode = posLeftNode->next;
@@ -106,14 +106,14 @@ void printbookList(struct Nodebook *headNode)
 	//[索引][表格]
 	while (pMove != NULL)
 	{
-		printf("书名: %s | 价格: %.1f | 数量: %d | 作者: %s | 出版社: %s | ISBN: %s | 借阅次数: %d\n",
-			   pMove->data.name,
-			   pMove->data.price,
-			   pMove->data.num,
-			   pMove->data.author,
-			   pMove->data.publishinghouse,
-			   pMove->data.ISBN,
-			   pMove->data.readnum);
+		std::cout << "书名: " << pMove->data.name
+				  << " | 价格: " << pMove->data.price
+				  << " | 数量: " << pMove->data.num
+				  << " | 作者: " << pMove->data.author
+				  << " | 出版社: " << pMove->data.publishinghouse
+				  << " | ISBN: " << pMove->data.ISBN
+				  << " | 借阅次数: " << pMove->data.readnum
+				  << "\n";
 		pMove = pMove->next;
 	}
 }
@@ -133,53 +133,53 @@ void freebookList(struct Nodebook *headNode)
 // 2.3书籍查找
 
 // 名字查找
-struct Nodebook *searchbookByName(struct Nodebook *headNode, char *bookName)
+struct Nodebook *searchbookByName(struct Nodebook *headNode, std::string bookName)
 {
 	struct Nodebook *posNode = headNode->next;
-	while (posNode != NULL && strcmp(posNode->data.name, bookName))
+	while (posNode != NULL && posNode->data.name != bookName)
 	{
 		posNode = posNode->next;
 	}
 	return posNode;
 }
 // ISBN查找
-struct Nodebook *searchbookByISBN(struct Nodebook *headNode, char *bookISBN)
+struct Nodebook *searchbookByISBN(struct Nodebook *headNode, std::string bookISBN)
 {
 	struct Nodebook *posNode = headNode->next;
-	while (posNode != NULL && strcmp(posNode->data.ISBN, bookISBN))
+	while (posNode != NULL && posNode->data.ISBN != bookISBN)
 	{
 		posNode = posNode->next;
 	}
 	return posNode;
 }
 // 作者查找
-void searchAndPrintBooksByAuthor(struct Nodebook *headNode, char *authorName)
+void searchAndPrintBooksByAuthor(struct Nodebook *headNode, const std::string &authorName)
 {
 	struct Nodebook *posNode = headNode->next;
 	int count = 0;
 
-	printf("作者 '%s' 的书籍列表\n\n", authorName);
+	printf("作者 '%s' 的书籍列表\n\n", authorName.c_str());
 
 	//[索引][表格]
 	while (posNode != NULL)
 	{
-		if (strcmp(posNode->data.author, authorName) == 0)
+		if (posNode->data.author == authorName)
 		{
 			count++;
-			printf("书名: %s | ISBN: %s | 价格: %.2f | 数量: %d | 出版社: %s | 借阅次数: %d\n",
-				   posNode->data.name,
-				   posNode->data.ISBN,
-				   posNode->data.price,
-				   posNode->data.num,
-				   posNode->data.publishinghouse,
-				   posNode->data.readnum);
+			std::cout << "书名: " << posNode->data.name
+					  << " | ISBN: " << posNode->data.ISBN
+					  << " | 价格: " << posNode->data.price
+					  << " | 数量: " << posNode->data.num
+					  << " | 出版社: " << posNode->data.publishinghouse
+					  << " | 借阅次数: " << posNode->data.readnum
+					  << "\n";
 		}
 		posNode = posNode->next;
 	}
 
 	if (count == 0)
 	{
-		printf("未找到作者 '%s' 的任何书籍。\n", authorName);
+		printf("未找到作者 '%s' 的任何书籍。\n", authorName.c_str());
 	}
 	else
 	{
@@ -200,7 +200,7 @@ struct Nodebook *mergeSortedbookLists(struct Nodebook *left,
 	while (left != NULL && right != NULL)
 	{
 		// 比较书名，按字典序升序排列
-		if (strcmp(left->data.name, right->data.name) <= 0)
+		if (left->data.name <= right->data.name)
 		{
 			tail->next = left;
 			left = left->next;
@@ -322,12 +322,12 @@ void displayTop10ByReadNum(struct Nodebook *headNode)
 	//[索引][表格]
 	for (int i = 0; i < displayCount; i++)
 	{
-		printf("排名: %d | 书名: %s | 作者: %s | 价格: %.1f | 借阅次数: %d\n",
-			   i + 1,
-			   books[i]->data.name,
-			   books[i]->data.author,
-			   books[i]->data.price,
-			   books[i]->data.readnum);
+		std::cout << "排名: " << (i + 1)
+				  << " | 书名: " << books[i]->data.name
+				  << " | 作者: " << books[i]->data.author
+				  << " | 价格: " << books[i]->data.price
+				  << " | 借阅次数: " << books[i]->data.readnum
+				  << "\n";
 	}
 
 	delete[] books;
@@ -393,12 +393,12 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 	//[索引][表格]
 	for (int i = 0; i < displayCount; i++)
 	{
-		printf("排名: %d | 书名: %s | 作者: %s | 价格: %.1f | 借阅次数: %d\n",
-			   i + 1,
-			   books[i]->data.name,
-			   books[i]->data.author,
-			   books[i]->data.price,
-			   books[i]->data.readnum);
+		std::cout << "排名: " << i + 1
+				  << " | 书名: " << books[i]->data.name
+				  << " | 作者: " << books[i]->data.author
+				  << " | 价格: " << books[i]->data.price
+				  << " | 借阅次数: " << books[i]->data.readnum
+				  << "\n";
 	}
 
 	delete[] books;
@@ -412,8 +412,8 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 
 struct userInfo
 {
-	char Account[20];
-	char Password[20];
+	std::string Account;
+	std::string Password;
 	int Role;
 };
 
@@ -448,12 +448,12 @@ void insertuserNodeByHead(struct Nodeuser *headNode, struct userInfo data)
 	headNode->next = newNode;
 }
 // 指定元素删除
-void deleteuserNodeByName(struct Nodeuser *headNode, char *userName)
+void deleteuserNodeByName(struct Nodeuser *headNode, const std::string &userName)
 {
 	struct Nodeuser *posLeftNode = headNode;
 	struct Nodeuser *posNode = headNode->next;
 
-	while (posNode != NULL && strcmp(posNode->data.Account, userName))
+	while (posNode != NULL && posNode->data.Account != userName)
 	{
 		posLeftNode = posNode;
 		posNode = posLeftNode->next;
@@ -477,10 +477,10 @@ void printuserList(struct Nodeuser *headNode)
 	//[索引][表格]
 	while (pMove != NULL)
 	{
-		printf("账号: %s | 密码: %s | 权限: %d\n",
-			   pMove->data.Account,
-			   pMove->data.Password,
-			   pMove->data.Role);
+		std::cout << "账号: " << pMove->data.Account
+				  << " | 密码: " << pMove->data.Password
+				  << " | 权限: " << pMove->data.Role
+				  << "\n";
 		pMove = pMove->next;
 	}
 }
@@ -497,10 +497,10 @@ void freeuserList(struct Nodeuser *headNode)
 	delete headNode; // ← 释放头节点
 }
 // 查找账号
-struct Nodeuser *searchuserByName(struct Nodeuser *headNode, char *userName)
+struct Nodeuser *searchuserByName(struct Nodeuser *headNode, const std::string &userName)
 {
 	struct Nodeuser *posNode = headNode->next;
-	while (posNode != NULL && strcmp(posNode->data.Account, userName))
+	while (posNode != NULL && posNode->data.Account != userName)
 	{
 		posNode = posNode->next;
 	}
@@ -520,7 +520,7 @@ struct Nodeuser *mergeSorteduserLists(struct Nodeuser *left,
 
 	while (left != NULL && right != NULL)
 	{
-		if (strcmp(left->data.Account, right->data.Account) <= 0)
+		if (left->data.Account <= right->data.Account)
 		{
 			tail->next = left;
 			left = left->next;
@@ -714,48 +714,70 @@ void makebookMenuPage6()
 // 存操作
 void savebookInfoToFile(const char *fileName, struct Nodebook *headNode)
 {
-	FILE *fp = fopen(fileName, "w");
+	std::ofstream ofs(fileName);
+	if (!ofs)
+		return; // 打开失败直接返回
+
 	struct Nodebook *pMove = headNode->next;
 	while (pMove != NULL)
 	{
-		fprintf(fp,
-				"%s\t%.1f\t%d\t%s\t%s\t%s\t%d\t%d\n",
-				pMove->data.name, pMove->data.price, pMove->data.num,
-				pMove->data.author, pMove->data.publishinghouse, pMove->data.ISBN,
-				pMove->data.readnum,
-				pMove->data.publishtime);
+		ofs << pMove->data.name << '\t'
+			<< pMove->data.price << '\t'
+			<< pMove->data.num << '\t'
+			<< pMove->data.author << '\t'
+			<< pMove->data.publishinghouse << '\t'
+			<< pMove->data.ISBN << '\t'
+			<< pMove->data.readnum << '\t'
+			<< pMove->data.publishtime << '\n';
 		pMove = pMove->next;
 	}
-	fclose(fp);
+	ofs.close();
 }
+
 // 读操作
 void readbookInfoFromFile(const char *fileName)
 {
-	FILE *fp = fopen(fileName, "r");
-	if (fp == NULL)
+	std::ifstream ifs(fileName);
+	if (!ifs)
 	{
-		fp = fopen(fileName, "w+");
-		fclose(fp);
-		fp = fopen(fileName, "r");
+		// 文件不存在，创建空文件后返回
+		std::ofstream ofs(fileName);
+		ofs.close();
+		Booksortsign = 0;
+		return;
 	}
-	struct bookInfo tempData;
 
-	// 检查文件是否为空
-	fseek(fp, 0, SEEK_END);
-	long fileSize = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	if (fileSize > 0)
+	std::string line;
+	while (std::getline(ifs, line))
 	{
-		while (fscanf(fp, "%19s\t%f\t%d\t%s\t%s\t%s\t%d\t%d\n", tempData.name,
-					  &tempData.price, &tempData.num, tempData.author,
-					  tempData.publishinghouse, tempData.ISBN, &tempData.readnum,
-					  &tempData.publishtime) != EOF)
+		if (line.empty())
+			continue; // 跳过空行
+
+		// 直接在本循环内按 '\t' 拆分
+		std::vector<std::string> f;
+		std::stringstream ss(line);
+		std::string item;
+		while (std::getline(ss, item, '\t'))
 		{
-			insertbookNodeByHead(booklist, tempData);
+			f.push_back(item);
 		}
+
+		if (f.size() < 8)
+			continue; // 字段不够，跳过这行
+
+		struct bookInfo tempData;
+		tempData.name = f[0];
+		tempData.price = std::stof(f[1]);
+		tempData.num = std::stoi(f[2]);
+		tempData.author = f[3];
+		tempData.publishinghouse = f[4];
+		tempData.ISBN = f[5];
+		tempData.readnum = std::stoi(f[6]);
+		tempData.publishtime = std::stoi(f[7]);
+
+		insertbookNodeByHead(booklist, tempData);
 	}
-	fclose(fp);
+	ifs.close();
 	Booksortsign = 0;
 }
 
@@ -764,31 +786,58 @@ void readbookInfoFromFile(const char *fileName)
 // 存操作
 void saveuserInfoToFile(const char *fileName, struct Nodeuser *headNode)
 {
-	FILE *fp = fopen(fileName, "w");
+	std::ofstream ofs(fileName);
+	if (!ofs)
+		return;
+
 	struct Nodeuser *pMove = headNode->next;
 	while (pMove != NULL)
 	{
-		fprintf(fp, "%s\t%s\t%d\n", pMove->data.Account, pMove->data.Password,
-				pMove->data.Role);
+		ofs << pMove->data.Account << '\t'
+			<< pMove->data.Password << '\t'
+			<< pMove->data.Role << '\n';
 		pMove = pMove->next;
 	}
-	fclose(fp);
+	ofs.close();
 }
+
 // 读操作
 void readuserInfoFromFile(const char *fileName)
 {
-	FILE *fp = fopen(fileName, "r");
-	if (fp == NULL)
+	std::ifstream ifs(fileName);
+	if (!ifs)
 	{
-		fp = fopen(fileName, "w+");
+		std::ofstream ofs(fileName); // 创建空文件
+		ofs.close();
+		return;
 	}
-	struct userInfo tempData;
-	while (fscanf(fp, "%s\t%s\t%d\n", tempData.Account, tempData.Password,
-				  &tempData.Role) != EOF)
+
+	std::string line;
+	while (std::getline(ifs, line))
 	{
+		if (line.empty())
+			continue;
+
+		// 直接在本循环内按 '\t' 拆分
+		std::vector<std::string> f;
+		std::stringstream ss(line);
+		std::string item;
+		while (std::getline(ss, item, '\t'))
+		{
+			f.push_back(item);
+		}
+
+		if (f.size() < 3)
+			continue;
+
+		struct userInfo tempData;
+		tempData.Account = f[0];
+		tempData.Password = f[1];
+		tempData.Role = std::stoi(f[2]);
+
 		insertuserNodeByHead(userlist, tempData);
 	}
-	fclose(fp);
+	ifs.close();
 }
 
 //------------------------------p6.交互模块------------------------------
@@ -824,17 +873,17 @@ void userkeyDown()
 		cout << "请输入账号密码，用空格/回车分隔:\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempUser.Account;
-		if (strcmp(tempUser.Account, "rt") == 0)
+		if (tempUser.Account == "rt")
 			break;
 		cin >> tempUser.Password;
-		if (strcmp(tempUser.Password, "rt") == 0)
+		if (tempUser.Password == "rt")
 			break;
 		userresult = searchuserByName(userlist, tempUser.Account);
 		if (userresult == NULL)
 		{
 			cout << "用户不存在\n";
 		}
-		else if (strcmp(userresult->data.Password, tempUser.Password) != 0)
+		else if (userresult->data.Password != tempUser.Password)
 		{
 			cout << "密码错误\n";
 		}
@@ -859,24 +908,25 @@ void userkeyDown()
 		cout << "输入用户的信息(Account,Password,Role)(Role=1用户;Role=2管理员):";
 		cout << "键入【rt】返回\n";
 		cin >> tempUser.Account;
-		if (strcmp(tempUser.Account, "rt") == 0)
+		if (tempUser.Account == "rt")
 			break;
 		cin >> tempUser.Password;
-		if (strcmp(tempUser.Password, "rt") == 0)
+		if (tempUser.Password == "rt")
 			break;
-		char tempRole[10];
+
+		std::string tempRole;
 		cin >> tempRole;
-		if (strcmp(tempRole, "1") == 0)
+		if (tempRole == "1")
 		{
 			Role = 1;
 			tempUser.Role = 1;
 		}
-		else if (strcmp(tempRole, "2") == 0)
+		else if (tempRole == "2")
 		{
 			Role = 2;
 			tempUser.Role = 2;
 		}
-		else if (strcmp(tempRole, "rt") == 0)
+		else if (tempRole == "rt")
 			break;
 		else
 		{
@@ -948,7 +998,7 @@ void bookkeyDownRole1() // 用户模式
 		cout << "请输入借阅的书名：";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
 		if (bookresult == NULL)
@@ -965,10 +1015,10 @@ void bookkeyDownRole1() // 用户模式
 				printf("借阅成功！\n");
 
 				//[索引][表格]
-				printf("书名: %s | 库存: %d | 借阅次数: %d\n",
-					   bookresult->data.name,
-					   bookresult->data.num,
-					   bookresult->data.readnum);
+				std::cout << "书名: " << bookresult->data.name
+						  << " | 库存: " << bookresult->data.num
+						  << " | 借阅次数: " << bookresult->data.readnum
+						  << "\n";
 			}
 			else
 			{
@@ -981,7 +1031,7 @@ void bookkeyDownRole1() // 用户模式
 		cout << "请输入归还的书名：";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
 		if (bookresult == NULL)
@@ -995,10 +1045,10 @@ void bookkeyDownRole1() // 用户模式
 			printf("书籍归还成功！\n");
 
 			//[索引][表格]
-			printf("书名: %s | 库存: %d | 借阅次数: %d\n",
-				   bookresult->data.name,
-				   bookresult->data.num,
-				   bookresult->data.readnum);
+			std::cout << "书名: " << bookresult->data.name
+					  << " | 库存: " << bookresult->data.num
+					  << " | 借阅次数: " << bookresult->data.readnum
+					  << "\n";
 		}
 		break;
 	case 6:
@@ -1052,7 +1102,7 @@ void bookkeyDownRole2() // 管理员模式
 		cout << "请输入借阅的书名：\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
 		if (bookresult == NULL)
@@ -1069,10 +1119,10 @@ void bookkeyDownRole2() // 管理员模式
 				printf("借阅成功！\n");
 
 				//[索引][表格]
-				printf("书名: %s | 库存: %d | 借阅次数: %d\n",
-					   bookresult->data.name,
-					   bookresult->data.num,
-					   bookresult->data.readnum);
+				std::cout << "书名: " << bookresult->data.name
+						  << " | 库存: " << bookresult->data.num
+						  << " | 借阅次数: " << bookresult->data.readnum
+						  << "\n";
 			}
 			else
 			{
@@ -1085,7 +1135,7 @@ void bookkeyDownRole2() // 管理员模式
 		cout << "请输入归还的书名：\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
 		if (bookresult == NULL)
@@ -1099,10 +1149,10 @@ void bookkeyDownRole2() // 管理员模式
 			printf("书籍归还成功！\n");
 
 			//[索引][表格]
-			printf("书名: %s | 库存: %d | 借阅次数: %d\n",
-				   bookresult->data.name,
-				   bookresult->data.num,
-				   bookresult->data.readnum);
+			std::cout << "书名: " << bookresult->data.name
+					  << " | 库存: " << bookresult->data.num
+					  << " | 借阅次数: " << bookresult->data.readnum
+					  << "\n";
 		}
 		break;
 	case 6:
@@ -1143,7 +1193,7 @@ void bookkeyDownRole2book()
 			<< "输入书籍的信息(name,price,num,author,publishinghouse,ISBN/ISSN):\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		cin >> tempBook.price >> tempBook.num >> tempBook.author >>
 			tempBook.publishinghouse >> tempBook.ISBN;
@@ -1159,7 +1209,7 @@ void bookkeyDownRole2book()
 		cout << "请输入删除的书名:\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		deletebookNodeByName(booklist, tempBook.name);
 		savebookInfoToFile("bookinfo.txt", booklist);
@@ -1200,10 +1250,10 @@ void bookkeyDownRole2user()
 		cout << "输入用户的信息(Account,Password,Role):";
 		cout << "键入【rt】返回\n";
 		cin >> tempUser.Account;
-		if (strcmp(tempUser.Account, "rt") == 0)
+		if (tempUser.Account == "rt")
 			break;
 		cin >> tempUser.Password;
-		if (strcmp(tempUser.Password, "rt") == 0)
+		if (tempUser.Password == "rt")
 			break;
 		string tempRole;
 		cin >> tempRole;
@@ -1237,7 +1287,7 @@ void bookkeyDownRole2user()
 		cout << "请输入删除的账号名:\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempUser.Account;
-		if (strcmp(tempUser.Account, "rt") == 0)
+		if (tempUser.Account == "rt")
 			break;
 		deleteuserNodeByName(userlist, tempUser.Account);
 		saveuserInfoToFile("userinfo.txt", userlist);
@@ -1249,7 +1299,7 @@ void bookkeyDownRole2user()
 		cout << "请输入需要重置密码的账号\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempUser.Account;
-		if (strcmp(tempUser.Account, "rt") == 0)
+		if (tempUser.Account == "rt")
 			break;
 		userresult = searchuserByName(userlist, tempUser.Account);
 		if (userresult == NULL)
@@ -1268,12 +1318,12 @@ void bookkeyDownRole2user()
 			if (tempA == "1")
 			{
 				cout << "重置默认密码：123456\n";
-				strcpy(userresult->data.Password, "123456");
+				userresult->data.Password = "123456";
 				saveuserInfoToFile("userinfo.txt", userlist);
 			}
 			else if (tempA == "0")
 			{
-				cout<<"【返回】";
+				cout << "【返回】";
 				break;
 			}
 			else
@@ -1289,7 +1339,7 @@ void bookkeyDownRole2user()
 		cout << "输入查找的账号:";
 		cout << "键入【rt】返回\n";
 		cin >> tempUser.Account;
-		if (strcmp(tempUser.Account, "rt") == 0)
+		if (tempUser.Account == "rt")
 			break;
 		userresult = searchuserByName(userlist, tempUser.Account);
 		if (userresult == NULL)
@@ -1299,10 +1349,10 @@ void bookkeyDownRole2user()
 		else
 		{
 			//[索引][表格]
-			printf("账号: %s | 密码: %s | 权限: %d\n",
-				   userresult->data.Account,
-				   userresult->data.Password,
-				   userresult->data.Role);
+			std::cout << "账号: " << userresult->data.Account
+					  << " | 密码: " << userresult->data.Password
+					  << " | 权限: " << userresult->data.Role
+					  << "\n";
 		}
 		break;
 	}
@@ -1337,7 +1387,7 @@ void bookkeyDownPage5()
 		cout << "请输入查找的书名:\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.name;
-		if (strcmp(tempBook.name, "rt") == 0)
+		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
 		if (bookresult == NULL)
@@ -1347,14 +1397,14 @@ void bookkeyDownPage5()
 		else
 		{
 			//[索引][表格]
-			printf("书名: %s | 价格: %.1f | 数量: %d | 作者: %s | 出版社: %s | ISBN: %s | 借阅次数: %d\n",
-				   bookresult->data.name,
-				   bookresult->data.price,
-				   bookresult->data.num,
-				   bookresult->data.author,
-				   bookresult->data.publishinghouse,
-				   bookresult->data.ISBN,
-				   bookresult->data.readnum);
+			std::cout << "书名: " << bookresult->data.name
+					  << " | 价格: " << bookresult->data.price
+					  << " | 数量: " << bookresult->data.num
+					  << " | 作者: " << bookresult->data.author
+					  << " | 出版社: " << bookresult->data.publishinghouse
+					  << " | ISBN: " << bookresult->data.ISBN
+					  << " | 借阅次数: " << bookresult->data.readnum
+					  << "\n";
 		}
 		break;
 	}
@@ -1364,7 +1414,7 @@ void bookkeyDownPage5()
 		cout << "请输入查找的ISBN:\n";
 		cout << "键入【rt】返回\n";
 		cin >> tempBook.ISBN;
-		if (strcmp(tempBook.ISBN, "rt") == 0)
+		if (tempBook.ISBN == "rt")
 			break;
 		bookresult = searchbookByISBN(booklist, tempBook.ISBN);
 		if (bookresult == NULL)
@@ -1374,14 +1424,14 @@ void bookkeyDownPage5()
 		else
 		{
 			//[索引][表格]
-			printf("书名: %s | 价格: %.1f | 数量: %d | 作者: %s | 出版社: %s | ISBN: %s | 借阅次数: %d\n",
-				   bookresult->data.name,
-				   bookresult->data.price,
-				   bookresult->data.num,
-				   bookresult->data.author,
-				   bookresult->data.publishinghouse,
-				   bookresult->data.ISBN,
-				   bookresult->data.readnum);
+			std::cout << "书名: " << bookresult->data.name
+					  << " | 价格: " << bookresult->data.price
+					  << " | 数量: " << bookresult->data.num
+					  << " | 作者: " << bookresult->data.author
+					  << " | 出版社: " << bookresult->data.publishinghouse
+					  << " | ISBN: " << bookresult->data.ISBN
+					  << " | 借阅次数: " << bookresult->data.readnum
+					  << "\n";
 		}
 		break;
 	}
@@ -1390,9 +1440,9 @@ void bookkeyDownPage5()
 		cout << "【按作者查找】\n";
 		cout << "请输入作者姓名:\n";
 		cout << "键入【rt】返回\n";
-		char authorName[20];
+		std::string authorName;
 		cin >> authorName;
-		if (strcmp(authorName, "rt") == 0)
+		if (authorName == "rt")
 			break;
 		searchAndPrintBooksByAuthor(booklist, authorName);
 		break;
@@ -1440,6 +1490,7 @@ void bookkeyDownPage6()
 
 int main()
 {
+	std::cout << std::fixed << std::setprecision(2);
 	userlist = createuserHead();
 	booklist = createbookHead();
 	readbookInfoFromFile("bookinfo.txt");
