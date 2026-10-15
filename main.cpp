@@ -1228,6 +1228,7 @@ void bookkeyDownRole2book()
 		cout
 			<< "输入书籍的信息(name,price,num,author,publishinghouse,ISBN/ISSN):\n";
 		cout << "键入【rt】返回\n";
+		//输入
 		if (!readValue(tempBook.name))
 		{
 			cout << "登记已取消\n";
@@ -1235,7 +1236,12 @@ void bookkeyDownRole2book()
 		}
 		if (tempBook.name == "rt")
 			break;
-
+		//查重，同名拒绝登记
+		if (searchbookByName(booklist, tempBook.name) != NULL)
+		{
+			cout << "已存在同名书籍，登记取消\n";
+			break;
+		}
 		if (!readValue(tempBook.price))
 		{
 			cout << "登记已取消\n";
@@ -1261,18 +1267,13 @@ void bookkeyDownRole2book()
 			cout << "登记已取消\n";
 			break;
 		}
-
-		//查重，同 ISBN 或同名都拒绝登记
+		//查重，同 ISBN拒绝登记
 		if (searchbookByISBN(booklist, tempBook.ISBN) != NULL)
 		{
 			cout << "该 ISBN 已存在，登记取消\n";
 			break;
 		}
-		if (searchbookByName(booklist, tempBook.name) != NULL)
-		{
-			cout << "已存在同名书籍，登记取消\n";
-			break;
-		}
+		
 
 		tempBook.readnum = 0;									// 初始借阅次数为0
 		tempBook.publishtime = getMaxPublishtime(booklist) + 1; // 设置publishtime为当前最大值+1
