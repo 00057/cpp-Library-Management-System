@@ -6,17 +6,22 @@
 #include <fstream>
 #include <vector>
 
+#include <sstream>
+#include <cstdlib>
+#include <cstdio>
+
 using namespace std;
 
 /*
 目录 输入p+序号搜索
 1.全局变量
-2.书籍管理
-3.登录模块
-4.菜单
-5.文件操作
-6.交互模块
-7.main函数
+2.函数
+3.书籍管理
+4.登录模块
+5.菜单
+6.文件操作
+7.交互模块
+8.main函数
 */
 
 //------------------------------p1.全局变量 ------------------------------
@@ -25,11 +30,31 @@ int Role = 0;		  // 0未登录 1用户 2管理员
 int Page = 1;		  // 1登录 2图书系统 3图书管理 4账号管理
 int Booksortsign = 0; // 0未排序 1已排序
 
-//------------------------------p2.书籍管理 ------------------------------
+//------------------------------p2.函数 ---------------------------------
+
+// 2.1 输入函数readValue
+
+// 本程序交互输入的统一入口，底层使用 cin >> value。
+
+// 从cin读取一个 T 类型的值，成功返回 true；失败时clear、ignore、提示，并返回 false。
+// 用法示例：if (!readValue(变量名)) return或break;
+
+template <class T>
+bool readValue(T &value)
+{
+	if (cin >> value)
+		return true;
+	cin.clear();
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	cout << "输入不合法，操作已取消\n";
+	return false;
+}
+
+//------------------------------p3.书籍管理 ------------------------------
 
 // bookmanager
 
-// 2.1书籍信息
+// 3.1书籍信息
 
 struct bookInfo
 {
@@ -43,7 +68,7 @@ struct bookInfo
 	int publishtime;			 // 录入顺序编号 - 新增
 };
 
-// 2.2书籍链表
+// 3.2书籍链表
 
 // 链表
 struct Nodebook
@@ -130,7 +155,7 @@ void freebookList(struct Nodebook *headNode)
 	delete headNode; // ← 释放头节点
 }
 
-// 2.3书籍查找
+// 3.3书籍查找
 
 // 名字查找
 struct Nodebook *searchbookByName(struct Nodebook *headNode, std::string bookName)
@@ -187,7 +212,7 @@ void searchAndPrintBooksByAuthor(struct Nodebook *headNode, const std::string &a
 	}
 }
 
-// 2.4书籍排序
+// 3.4书籍排序
 
 // 书籍归并排序根据字典序排序
 //  合并两个有序链表（按书名字典序升序）
@@ -275,9 +300,9 @@ void mergeSortbookList(struct Nodebook *headNode)
 	headNode->next = dataHead;
 }
 
-// 2.5排行榜功能
+// 3.5排行榜功能
 
-// 2.5.1借阅次数排行榜
+// 3.5.1借阅次数排行榜
 //  比较函数，用于qsort（借阅次数降序）
 int compareByReadNum(const void *a, const void *b)
 {
@@ -333,7 +358,7 @@ void displayTop10ByReadNum(struct Nodebook *headNode)
 	delete[] books;
 }
 
-// 2.5.2 最新出版排行榜（按publishtime排序，数值越大表示越新）
+// 3.5.2 最新出版排行榜（按publishtime排序，数值越大表示越新）
 // 比较函数，用于qsort（出版时间降序）
 int compareByPublishTime(const void *a, const void *b)
 {
@@ -404,11 +429,11 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 	delete[] books;
 }
 
-//------------------------------p3.登录模块 ------------------------------
+//------------------------------p4.登录模块 ------------------------------
 
 // register
 
-// 3.1账号信息
+// 4.1账号信息
 
 struct userInfo
 {
@@ -417,7 +442,7 @@ struct userInfo
 	int Role;
 };
 
-// 3.2账号链表
+// 4.2账号链表
 
 struct Nodeuser
 {
@@ -507,7 +532,7 @@ struct Nodeuser *searchuserByName(struct Nodeuser *headNode, const std::string &
 	return posNode;
 }
 
-// 3.3账号排序
+// 4.3账号排序
 
 // 账号归并排序按字典序
 //  合并两个有序链表（按账号名升序）
@@ -593,7 +618,7 @@ void mergeSortuserList(struct Nodeuser *headNode)
 	headNode->next = dataHead;
 }
 
-//------------------------------p4.菜单 ------------------------------
+//------------------------------p5.菜单 ------------------------------
 
 // Page1→Role1→Page2→Page5/6
 //      →Role2→Page2→Page3/4/5/6
@@ -707,7 +732,7 @@ void makebookMenuPage6()
 	printf("请输入(0~2):");
 }
 
-//------------------------------p5.文件操作------------------------------
+//------------------------------p6.文件操作------------------------------
 
 // 5.1 图书模块文件操作
 
@@ -840,23 +865,19 @@ void readuserInfoFromFile(const char *fileName)
 	ifs.close();
 }
 
-//------------------------------p6.交互模块------------------------------
+//------------------------------p7.交互模块------------------------------
 
-// 6.1 Page1
+// 7.1 Page1
 
 void userkeyDown()
 {
 	int userKey = -1;
 	struct userInfo tempUser; // 产生临时变量存储账号信息
 	struct Nodeuser *userresult = NULL;
-	if (!(cin >> userKey)) // 判断非法输入
-	{
-		cout << "请输入合法的选项\n";
-		cin.clear();										 // 清除失败状态
-		cin.ignore(numeric_limits<streamsize>::max(), '\n'); // 清空当前行
-		cout << "按任意键返回上一界面\n";
+
+	if (!readValue(userKey))
 		return;
-	}
+
 	switch (userKey)
 	{
 	case 0:
@@ -872,12 +893,16 @@ void userkeyDown()
 		cout << "【登录】\n";
 		cout << "请输入账号密码，用空格/回车分隔:\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempUser.Account;
+		if (!readValue(tempUser.Account))
+			break;
 		if (tempUser.Account == "rt")
 			break;
-		cin >> tempUser.Password;
+
+		if (!readValue(tempUser.Password))
+			break;
 		if (tempUser.Password == "rt")
 			break;
+
 		userresult = searchuserByName(userlist, tempUser.Account);
 		if (userresult == NULL)
 		{
@@ -907,15 +932,19 @@ void userkeyDown()
 		cout << "【注册】";
 		cout << "输入用户的信息(Account,Password,Role)(Role=1用户;Role=2管理员):";
 		cout << "键入【rt】返回\n";
-		cin >> tempUser.Account;
+		if (!readValue(tempUser.Account))
+			break;
 		if (tempUser.Account == "rt")
 			break;
-		cin >> tempUser.Password;
+
+		if (!readValue(tempUser.Password))
+			break;
 		if (tempUser.Password == "rt")
 			break;
 
 		std::string tempRole;
-		cin >> tempRole;
+		if (!readValue(tempRole))
+			break;
 		if (tempRole == "1")
 		{
 			Role = 1;
@@ -958,14 +987,15 @@ void userkeyDown()
 	}
 }
 
-// 6.2 Page2Role1
+// 7.2 Page2Role1
 
 void bookkeyDownRole1() // 用户模式
 {
 	int userKey = 0;
 	struct bookInfo tempBook; // 产生临时变量存储书籍信息
 	struct Nodebook *bookresult = NULL;
-	cin >> userKey;
+	if (!readValue(userKey))
+		return;
 	switch (userKey)
 	{
 	case 0:
@@ -997,7 +1027,8 @@ void bookkeyDownRole1() // 用户模式
 		cout << "【借阅】\n";
 		cout << "请输入借阅的书名：";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+			break;
 		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
@@ -1030,7 +1061,8 @@ void bookkeyDownRole1() // 用户模式
 		cout << "【归还】\n";
 		cout << "请输入归还的书名：";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+			break;
 		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
@@ -1062,14 +1094,15 @@ void bookkeyDownRole1() // 用户模式
 	}
 }
 
-// 6.3 Page2Role2
+// 7.3 Page2Role2
 
 void bookkeyDownRole2() // 管理员模式
 {
 	int userKey = 0;
 	struct bookInfo tempBook; // 产生临时变量存储书籍信息
 	struct Nodebook *bookresult = NULL;
-	cin >> userKey;
+	if (!readValue(userKey))
+		return;
 	switch (userKey)
 	{
 	case 0:
@@ -1101,7 +1134,8 @@ void bookkeyDownRole2() // 管理员模式
 		cout << "【借阅书籍】\n";
 		cout << "请输入借阅的书名：\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+			break;
 		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
@@ -1134,7 +1168,8 @@ void bookkeyDownRole2() // 管理员模式
 		cout << "【归还书籍】\n";
 		cout << "请输入归还的书名：\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+			break;
 		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
@@ -1174,13 +1209,14 @@ void bookkeyDownRole2() // 管理员模式
 	}
 }
 
-// 6.4  Page3Role2
+// 7.4  Page3Role2
 
 void bookkeyDownRole2book()
 {
 	int userKey = 0;
 	struct bookInfo tempBook; // 产生临时变量存储书籍信息
-	cin >> userKey;
+	if (!readValue(userKey))
+		return;
 	switch (userKey)
 	{
 	case 0:
@@ -1192,14 +1228,41 @@ void bookkeyDownRole2book()
 		cout
 			<< "输入书籍的信息(name,price,num,author,publishinghouse,ISBN/ISSN):\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+		{
+			cout << "登记已取消\n";
+			break;
+		}
 		if (tempBook.name == "rt")
 			break;
-		cin >> tempBook.price >> tempBook.num >> tempBook.author >>
-			tempBook.publishinghouse >> tempBook.ISBN;
-		tempBook.readnum = 0; // 初始借阅次数为0
-		// 设置publishtime为当前最大值+1
-		tempBook.publishtime = getMaxPublishtime(booklist) + 1;
+
+		if (!readValue(tempBook.price))
+		{
+			cout << "登记已取消\n";
+			break;
+		}
+		if (!readValue(tempBook.num))
+		{
+			cout << "登记已取消\n";
+			break;
+		}
+		if (!readValue(tempBook.author))
+		{
+			cout << "登记已取消\n";
+			break;
+		}
+		if (!readValue(tempBook.publishinghouse))
+		{
+			cout << "登记已取消\n";
+			break;
+		}
+		if (!readValue(tempBook.ISBN))
+		{
+			cout << "登记已取消\n";
+			break;
+		}
+		tempBook.readnum = 0;									// 初始借阅次数为0
+		tempBook.publishtime = getMaxPublishtime(booklist) + 1; // 设置publishtime为当前最大值+1
 		insertbookNodeByHead(booklist, tempBook);
 		savebookInfoToFile("bookinfo.txt", booklist);
 		cout << "登记成功\n";
@@ -1208,7 +1271,8 @@ void bookkeyDownRole2book()
 		cout << "【删除书籍】\n";
 		cout << "请输入删除的书名:\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+			break;
 		if (tempBook.name == "rt")
 			break;
 		deletebookNodeByName(booklist, tempBook.name);
@@ -1221,14 +1285,15 @@ void bookkeyDownRole2book()
 	}
 }
 
-// 6.5 Page4Role2
+// 7.5 Page4Role2
 
 void bookkeyDownRole2user()
 {
 	int userKey = 0;
 	struct userInfo tempUser; // 产生临时变量存储账号信息
 	struct Nodeuser *userresult = NULL;
-	cin >> userKey;
+	if (!readValue(userKey))
+		return;
 	switch (userKey)
 	{
 	case 0:
@@ -1249,14 +1314,17 @@ void bookkeyDownRole2user()
 		cout << "【注册账号】";
 		cout << "输入用户的信息(Account,Password,Role):";
 		cout << "键入【rt】返回\n";
-		cin >> tempUser.Account;
+		if (!readValue(tempUser.Account))
+			break;
 		if (tempUser.Account == "rt")
 			break;
-		cin >> tempUser.Password;
+		if (!readValue(tempUser.Password))
+			break;
 		if (tempUser.Password == "rt")
 			break;
 		string tempRole;
-		cin >> tempRole;
+		if (!readValue(tempRole))
+			break;
 		if (tempRole == "1")
 			tempUser.Role = 1;
 		else if (tempRole == "2")
@@ -1286,7 +1354,8 @@ void bookkeyDownRole2user()
 		cout << "【删除账号】\n";
 		cout << "请输入删除的账号名:\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempUser.Account;
+		if (!readValue(tempUser.Account))
+			break;
 		if (tempUser.Account == "rt")
 			break;
 		deleteuserNodeByName(userlist, tempUser.Account);
@@ -1298,7 +1367,8 @@ void bookkeyDownRole2user()
 		cout << "【重置密码】\n";
 		cout << "请输入需要重置密码的账号\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempUser.Account;
+		if (!readValue(tempUser.Account))
+			break;
 		if (tempUser.Account == "rt")
 			break;
 		userresult = searchuserByName(userlist, tempUser.Account);
@@ -1313,7 +1383,8 @@ void bookkeyDownRole2user()
 			cout << "确定要重置密码为123456吗？是请输入1，否请输入0\n";
 
 			string tempA;
-			cin >> tempA;
+			if (!readValue(tempA))
+				break;
 
 			if (tempA == "1")
 			{
@@ -1338,7 +1409,8 @@ void bookkeyDownRole2user()
 		cout << "【查找账号】";
 		cout << "输入查找的账号:";
 		cout << "键入【rt】返回\n";
-		cin >> tempUser.Account;
+		if (!readValue(tempUser.Account))
+			break;
 		if (tempUser.Account == "rt")
 			break;
 		userresult = searchuserByName(userlist, tempUser.Account);
@@ -1365,14 +1437,15 @@ void bookkeyDownRole2user()
 	}
 }
 
-// 6.6 Page5
+// 7.6 Page5
 
 void bookkeyDownPage5()
 {
 	int userKey = 0;
 	struct bookInfo tempBook; // 产生临时变量存储书籍信息
 	struct Nodebook *bookresult = NULL;
-	cin >> userKey;
+	if (!readValue(userKey))
+		return;
 	switch (userKey)
 	{
 	case 0:
@@ -1386,7 +1459,8 @@ void bookkeyDownPage5()
 		cout << "【按书名查找】\n";
 		cout << "请输入查找的书名:\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.name;
+		if (!readValue(tempBook.name))
+			break;
 		if (tempBook.name == "rt")
 			break;
 		bookresult = searchbookByName(booklist, tempBook.name);
@@ -1413,7 +1487,8 @@ void bookkeyDownPage5()
 		cout << "【按ISBN查找】\n";
 		cout << "请输入查找的ISBN:\n";
 		cout << "键入【rt】返回\n";
-		cin >> tempBook.ISBN;
+		if (!readValue(tempBook.ISBN))
+			break;
 		if (tempBook.ISBN == "rt")
 			break;
 		bookresult = searchbookByISBN(booklist, tempBook.ISBN);
@@ -1441,7 +1516,8 @@ void bookkeyDownPage5()
 		cout << "请输入作者姓名:\n";
 		cout << "键入【rt】返回\n";
 		std::string authorName;
-		cin >> authorName;
+		if (!readValue(authorName))
+			break;
 		if (authorName == "rt")
 			break;
 		searchAndPrintBooksByAuthor(booklist, authorName);
@@ -1456,14 +1532,15 @@ void bookkeyDownPage5()
 	}
 }
 
-// 6.7 Page6
+// 7.7 Page6
 
 void bookkeyDownPage6()
 {
 	int userKey = 0;
 	// struct bookInfo tempBook;//产生临时变量存储书籍信息
 	// struct Nodebook* bookresult=NULL;
-	cin >> userKey;
+	if (!readValue(userKey))
+		return;
 
 	switch (userKey)
 	{
@@ -1486,7 +1563,7 @@ void bookkeyDownPage6()
 	}
 }
 
-//------------------------------p7.main函数 ------------------------------
+//------------------------------p8.main函数 ------------------------------
 
 int main()
 {
