@@ -9,6 +9,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
+#include <climits>
 
 using namespace std;
 
@@ -35,7 +36,6 @@ int Booksortsign = 0; // 0未排序 1已排序
 // 2.1 输入函数readValue
 
 // 本程序交互输入的统一入口，底层使用 cin >> value。
-
 // 从cin读取一个 T 类型的值，成功返回 true；失败时clear、ignore、提示，并返回 false。
 // 用法示例：if (!readValue(变量名)) return或break;
 
@@ -46,9 +46,16 @@ bool readValue(T &value)
 		return true;
 	cin.clear();
 	cin.ignore(numeric_limits<streamsize>::max(), '\n');
-	cout << "输入不合法，操作已取消\n";
+	cout << "输入不合法\n";
 	return false;
 }
+
+// 2.2 释放链表函数cleanUp
+
+// 定义在4.4，释放链表userlist,booklist
+// 用法示例：在exit(0)前调用cleanUp(),手动释放
+
+void cleanUp();
 
 //------------------------------p3.书籍管理 ------------------------------
 
@@ -306,11 +313,15 @@ void mergeSortbookList(struct Nodebook *headNode)
 //  比较函数，用于qsort（借阅次数降序）
 int compareByReadNum(const void *a, const void *b)
 {
-	struct Nodebook *bookA = *(struct Nodebook **)a;
-	struct Nodebook *bookB = *(struct Nodebook **)b;
+	const struct Nodebook *bookA = *(const struct Nodebook **)a;
+	const struct Nodebook *bookB = *(const struct Nodebook **)b;
 
 	// 按借阅次数降序排列（次数多的在前）
-	return bookB->data.readnum - bookA->data.readnum;
+	if (bookA->data.readnum < bookB->data.readnum)
+		return 1;
+	if (bookA->data.readnum > bookB->data.readnum)
+		return -1;
+	return 0;
 }
 // 借阅次数排行榜
 void displayTop10ByReadNum(struct Nodebook *headNode)
@@ -362,11 +373,15 @@ void displayTop10ByReadNum(struct Nodebook *headNode)
 // 比较函数，用于qsort（出版时间降序）
 int compareByPublishTime(const void *a, const void *b)
 {
-	struct Nodebook *bookA = *(struct Nodebook **)a;
-	struct Nodebook *bookB = *(struct Nodebook **)b;
+	const struct Nodebook *bookA = *(const struct Nodebook **)a;
+	const struct Nodebook *bookB = *(const struct Nodebook **)b;
 
 	// 按出版时间降序排列（新的在前）
-	return bookB->data.publishtime - bookA->data.publishtime;
+	if (bookA->data.publishtime < bookB->data.publishtime)
+		return 1;
+	if (bookA->data.publishtime > bookB->data.publishtime)
+		return -1;
+	return 0;
 }
 // 获取当前最大的publishtime
 int getMaxPublishtime(struct Nodebook *headNode)
@@ -384,6 +399,7 @@ int getMaxPublishtime(struct Nodebook *headNode)
 	return maxTime;
 }
 // 最新出版排行榜
+// 注意：实际为最新录入排行榜
 void displayTop10ByPublishTime(struct Nodebook *headNode)
 {
 	printf("=== 最新出版排行榜 TOP 10 ===\n");
@@ -421,8 +437,7 @@ void displayTop10ByPublishTime(struct Nodebook *headNode)
 		std::cout << "排名: " << i + 1
 				  << " | 书名: " << books[i]->data.name
 				  << " | 作者: " << books[i]->data.author
-				  << " | 价格: " << books[i]->data.price
-				  << " | 借阅次数: " << books[i]->data.readnum
+				  << " | ISBN: " << books[i]->data.ISBN
 				  << "\n";
 	}
 
@@ -618,6 +633,15 @@ void mergeSortuserList(struct Nodeuser *headNode)
 	headNode->next = dataHead;
 }
 
+// 4.4 释放链表函数
+void cleanUp()
+{
+	freeuserList(userlist);
+	freebookList(booklist);
+	userlist = NULL;
+	booklist = NULL;
+}
+
 //------------------------------p5.菜单 ------------------------------
 
 // Page1→Role1→Page2→Page5/6
@@ -792,13 +816,24 @@ void readbookInfoFromFile(const char *fileName)
 
 		struct bookInfo tempData;
 		tempData.name = f[0];
-		tempData.price = std::stof(f[1]);
-		tempData.num = std::stoi(f[2]);
 		tempData.author = f[3];
 		tempData.publishinghouse = f[4];
 		tempData.ISBN = f[5];
-		tempData.readnum = std::stoi(f[6]);
-		tempData.publishtime = std::stoi(f[7]);
+		try
+		{
+			tempData.price = std::stof(f[1]);
+			tempData.num = std::stoi(f[2]);
+			tempData.readnum = std::stoi(f[6]);
+			tempData.publishtime = std::stoi(f[7]);
+		}
+		catch (const std::exception &)
+		{
+			continue; // 文件格式错误，跳过这一行
+		}
+		// 非负校验，非法数据跳过
+		if (tempData.price < 0 || tempData.num < 0 ||
+			tempData.readnum < 0 || tempData.publishtime < 0)
+			continue;
 
 		insertbookNodeByHead(booklist, tempData);
 	}
@@ -858,8 +893,16 @@ void readuserInfoFromFile(const char *fileName)
 		struct userInfo tempData;
 		tempData.Account = f[0];
 		tempData.Password = f[1];
-		tempData.Role = std::stoi(f[2]);
-
+		try
+		{
+			tempData.Role = std::stoi(f[2]);
+		}
+		catch (const std::exception &)
+		{
+			continue; // 角色解析失败，跳过这一行
+		}
+		if (tempData.Role != 1 && tempData.Role != 2)
+			continue;
 		insertuserNodeByHead(userlist, tempData);
 	}
 	ifs.close();
@@ -885,6 +928,7 @@ void userkeyDown()
 		cout << "【退出】";
 		cout << "退出成功\n";
 		system("pause");
+		cleanUp();
 		exit(0);
 		break;
 	}
@@ -1002,6 +1046,7 @@ void bookkeyDownRole1() // 用户模式
 		cout << "【退出系统】";
 		cout << "退出成功\n";
 		system("pause");
+		cleanUp();
 		exit(0);
 		break;
 	case 1:
@@ -1072,6 +1117,11 @@ void bookkeyDownRole1() // 用户模式
 		}
 		else
 		{
+			if (bookresult->data.num == numeric_limits<int>::max())
+			{
+				cout << "库存已达上限，无法再增加\n";
+				break;
+			}
 			bookresult->data.num++;
 			savebookInfoToFile("bookinfo.txt", booklist);
 			printf("书籍归还成功！\n");
@@ -1109,6 +1159,7 @@ void bookkeyDownRole2() // 管理员模式
 		cout << "【退出系统】";
 		cout << "退出成功\n";
 		system("pause");
+		cleanUp();
 		exit(0);
 		break;
 	case 1:
@@ -1179,6 +1230,11 @@ void bookkeyDownRole2() // 管理员模式
 		}
 		else
 		{
+			if (bookresult->data.num == numeric_limits<int>::max())
+			{
+				cout << "库存已达上限，无法再增加\n";
+				break;
+			}
 			bookresult->data.num++;
 			savebookInfoToFile("bookinfo.txt", booklist);
 			printf("书籍归还成功！\n");
@@ -1220,15 +1276,19 @@ void bookkeyDownRole2book()
 	switch (userKey)
 	{
 	case 0:
+	{
 		cout << "【返回】";
 		Page = 2;
 		break;
+	}
 	case 1:
+	{
 		cout << "【登记书籍】";
 		cout
 			<< "输入书籍的信息(name,price,num,author,publishinghouse,ISBN/ISSN):\n";
 		cout << "键入【rt】返回\n";
-		//输入
+
+		// 输入tempbook.name,price,num,author,publishinghouse,ISBN
 		if (!readValue(tempBook.name))
 		{
 			cout << "登记已取消\n";
@@ -1236,20 +1296,24 @@ void bookkeyDownRole2book()
 		}
 		if (tempBook.name == "rt")
 			break;
-		//查重，同名拒绝登记
-		if (searchbookByName(booklist, tempBook.name) != NULL)
-		{
-			cout << "已存在同名书籍，登记取消\n";
-			break;
-		}
 		if (!readValue(tempBook.price))
 		{
 			cout << "登记已取消\n";
 			break;
 		}
+		if (tempBook.price < 0)
+		{
+			cout << "价格不能为负数，登记取消\n";
+			break;
+		}
 		if (!readValue(tempBook.num))
 		{
 			cout << "登记已取消\n";
+			break;
+		}
+		if (tempBook.num < 0)
+		{
+			cout << "数量不能为负数，登记取消\n";
 			break;
 		}
 		if (!readValue(tempBook.author))
@@ -1267,21 +1331,35 @@ void bookkeyDownRole2book()
 			cout << "登记已取消\n";
 			break;
 		}
-		//查重，同 ISBN拒绝登记
+		// 查重，同 ISBN拒绝登记
 		if (searchbookByISBN(booklist, tempBook.ISBN) != NULL)
 		{
 			cout << "该 ISBN 已存在，登记取消\n";
 			break;
 		}
-		
+		// 查重，同名拒绝登记
+		if (searchbookByName(booklist, tempBook.name) != NULL)
+		{
+			cout << "已存在同名书籍，登记取消\n";
+			break;
+		}
 
-		tempBook.readnum = 0;									// 初始借阅次数为0
-		tempBook.publishtime = getMaxPublishtime(booklist) + 1; // 设置publishtime为当前最大值+1
+		tempBook.readnum = 0; // 初始借阅次数为0
+
+		// 设置publishtime为当前最大值+1
+		int maxTime = getMaxPublishtime(booklist);
+		if (maxTime == INT_MAX)
+			tempBook.publishtime = INT_MAX;
+		else
+			tempBook.publishtime = maxTime + 1;
+
 		insertbookNodeByHead(booklist, tempBook);
 		savebookInfoToFile("bookinfo.txt", booklist);
 		cout << "登记成功\n";
 		break;
+	}
 	case 2:
+	{
 		cout << "【删除书籍】\n";
 		cout << "请输入删除的书名:\n";
 		cout << "键入【rt】返回\n";
@@ -1292,10 +1370,13 @@ void bookkeyDownRole2book()
 		deletebookNodeByName(booklist, tempBook.name);
 		savebookInfoToFile("bookinfo.txt", booklist);
 		break;
+	}
 	default:
+	{
 		cout << "【返回】";
 		Page = 2;
 		break;
+	}
 	}
 }
 
